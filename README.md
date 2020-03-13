@@ -1,17 +1,20 @@
 # SoalShiftSISOP20_modul2_E08
 
 Penyelesaian Soal Shift Modul 2 SISOP 2020
+
 Achmad Zidan Akbar / 05111840000005
+
 M RIDHO DAFFA ARDISTA / 05111840000065	
 
 <h3>Nomor 1</h3>
 Buatlah program C yang menyerupai crontab untuk menjalankan script bash dengan
 ketentuan sebagai berikut:
+
  1. Program menerima 4 argumen berupa:
- - Detik: 0-59 atau * (any value)
- - Menit: 0-59 atau * (any value)
- - Jam: 0-23 atau * (any value)
- - iv. Path file .sh
+    - Detik: 0-59 atau * (any value)
+    - Menit: 0-59 atau * (any value)
+    - Jam: 0-23 atau * (any value)
+    - iv. Path file .sh
  2. Program akan mengeluarkan pesan error jika argumen yang diberikan tidak sesuai
  3. Program hanya menerima 1 config cron
  4. Program berjalan di background (daemon)
@@ -148,3 +151,127 @@ Program Utama
         }
             
     } 
+
+
+<h3>Nomor 3</h3>
+
+Jaya adalah seorang programmer handal mahasiswa informatika. Suatu hari dia
+memperoleh tugas yang banyak dan berbeda tetapi harus dikerjakan secara bersamaan
+(multiprocessing).
+
+1. Program buatan jaya harus bisa membuat dua direktori di “/home/[USER]/modul2/”. Direktori yang pertama diberi nama “indomie”, lalu lima detik kemudian membuat direktori yang kedua bernama “sedaap”.
+2. Kemudian program tersebut harus meng-ekstrak file jpg.zip di direktori “/home/[USER]/modul2/”. Setelah tugas sebelumnya selesai, ternyata tidak hanya itu tugasnya. 
+3. Diberilah tugas baru yaitu setelah di ekstrak, hasil dari ekstrakan tersebut (di
+dalam direktori “home/[USER]/modul2/jpg/”) harus dipindahkan sesuai dengan
+pengelompokan, semua file harus dipindahkan ke
+“/home/[USER]/modul2/sedaap/” dan semua direktori harus dipindahkan ke
+“/home/[USER]/modul2/indomie/”.
+4. Untuk setiap direktori yang dipindahkan ke “/home/[USER]/modul2/indomie/”
+harus membuat dua file kosong. File yang pertama diberi nama “coba1.txt”, lalu
+3 detik kemudian membuat file bernama “coba2.txt”.
+(contoh : “/home/[USER]/modul2/indomie/{nama_folder}/coba1.txt”).
+
+Karena Jaya terlalu banyak tugas dia jadi stress, jadi bantulah Jaya agar bisa membuat
+program tersebut.
+
+Program : 
+
+lib yang dibutuhkan 
+
+    #include <dirent.h>
+    #include <unistd.h> 
+    #include <stdio.h> 
+    #include <stdlib.h> 
+    #include <string.h> 
+    #include <sys/stat.h>
+    #include <sys/wait.h>
+
+mengecek direcotry pada suatu path
+
+    int Check(const char *path)
+    {
+    struct stat path_stat;
+    stat(path, &path_stat);
+    return S_ISDIR(path_stat.st_mode);
+    }
+
+program utama
+
+*Note* : masih belum sempuran, hanya sampai poin c
+
+    int status;
+    int file_count = 0;
+    DIR * dirp;
+    struct dirent * entry;
+    char fileName[100],dirName[100];
+    char *fileArgv[100];
+    char *fileArgv2[100];
+    int counterF = 0, counterD=0;
+    for (counterF = 0; counterF <100; counterF++,counterD++){
+      fileArgv[counterF] = (char*) malloc (100 * sizeof(char));
+      fileArgv2[counterD]= (char*) malloc (100 * sizeof(char));
+    }
+    strcpy(fileArgv[0],"mv");
+    strcpy(fileArgv2[0], "mv");
+    counterF = 1;
+    counterD = 1;
+    strcpy(fileName,"");
+    strcpy(dirName,"");
+    dirp = opendir("/home/daffa/Downloads/jpg/"); /* There should be error handling after this */
+    while ((entry = readdir(dirp)) != NULL) {
+        if (entry->d_type == DT_REG) { /* If the entry is a regular file */
+          strcpy(fileName,"/home/daffa/modul2/jpg/");
+          strcat(fileName, entry->d_name);
+          // strcat(fileName, " ");
+          
+          strcpy(fileArgv[counterF],fileName);
+          counterF++;
+        } else{
+          strcpy(fileName,"/home/daffa/modul2/jpg/");
+          strcat(dirName, entry->d_name);
+          
+          strcpy(fileArgv2[counterF],dirName);
+          counterD++;
+        }
+    }
+    strcpy(fileArgv[counterF],"/home/daffa/modul2/sedaap/");
+    strcpy(fileArgv2[counterD],"/home/daffa/modul2/indomie/");
+    fileArgv[counterF+1] = NULL;
+    fileArgv2[counterD+1] = NULL;
+
+    closedir(dirp);
+
+    pid_t child_id1,child_id2,child_id3, child_id4, child_id5;
+    child_id1 = fork();
+    child_id2 = fork();
+    child_id3 = fork();
+    child_id4 = fork();
+    child_id5 = fork();
+    if (child_id1 == 0) 
+    {   
+      char *argv[] = {"mkdir", "-p", "/home/daffa/modul2/indomie", NULL};
+      execv("/bin/mkdir", argv);
+    }
+      if (child_id2 == 0)      
+    {
+      
+      while ((wait(&status)) > 0);
+      sleep(5);
+
+      char *argv[] = {"mkdir", "-p", "/home/daffa/modul2/sedaap", NULL};
+      execv("/bin/mkdir", argv);
+    }
+    if(child_id3 == 0)
+    {
+      while ((wait(&status)) > 0);
+    char *argv[] = {"unzip", "/home/daffa/Downloads/jpg.zip", "-d", "/home/daffa/modul2/",NULL};
+      execv("usr/bin/unzip", argv);
+    }
+    if(child_id4 == 0 && child_id3 > 0 && child_id2 > 0 && child_id1 > 0){
+      execv("/bin/mv",fileArgv);
+    }
+    if (child_id5 == 0 && child_id4 > 0 && child_id3 > 0 && child_id2 > 0 && child_id1 > 0)
+    {
+      execv("/bin/mv",fileArgv2);
+    }
+    
