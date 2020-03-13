@@ -7,21 +7,21 @@ M RIDHO DAFFA ARDISTA / 05111840000065
 <h3>Nomor 1</h3>
 Buatlah program C yang menyerupai crontab untuk menjalankan script bash dengan
 ketentuan sebagai berikut:
-1. Program menerima 4 argumen berupa:
-- Detik: 0-59 atau * (any value)
-- Menit: 0-59 atau * (any value)
-- Jam: 0-23 atau * (any value)
-- iv. Path file .sh
-2. Program akan mengeluarkan pesan error jika argumen yang diberikan tidak
-sesuai
-3. Program hanya menerima 1 config cron
-4. Program berjalan di background (daemon)
-5. Tidak boleh menggunakan fungsi system()
+ 1. Program menerima 4 argumen berupa:
+ - Detik: 0-59 atau * (any value)
+ - Menit: 0-59 atau * (any value)
+ - Jam: 0-23 atau * (any value)
+ - iv. Path file .sh
+ 2. Program akan mengeluarkan pesan error jika argumen yang diberikan tidak sesuai
+ 3. Program hanya menerima 1 config cron
+ 4. Program berjalan di background (daemon)
+ 5. Tidak boleh menggunakan fungsi system()
 Contoh: ./program \* 34 7 /home/somi/test.sh
 Program dengan argumen seperti contoh di atas akan menjalankan script test.sh setiap
 detik pada jam 07:34.
 
 include lib
+
     #include <sys/types.h>
     #include <sys/stat.h>
     #include <stdio.h>
@@ -33,6 +33,7 @@ include lib
     #include <time.h>
 
 Fungsi untuk mengechek apakah filenya ada atau tidak
+
     int Check(const char * filename){
         FILE *file;
         if (file = fopen(filename, "r")){
@@ -44,6 +45,7 @@ Fungsi untuk mengechek apakah filenya ada atau tidak
 
 
 Mengecek input
+
     int i, input[5], every[5];
 	for(i = 1; i < argc-1; i++)
     {
@@ -58,6 +60,7 @@ Mengecek input
     }
 
 Syarat input
+
     if(((input[1] > 60 || input[1] < 0) && every[1] == 0) 
     || ((input[2] > 60 || input[2] < 0) && every[2] == 0)
     || ((input[3] > 24 || input[3] < 0) && every[3] == 0)
@@ -79,14 +82,17 @@ Keluar saat fork gagal (nilai variabel pid < 0)
     }
   
 Keluar saat fork berhasil (nilai variabel pid adalah PID dari child process)
+
     if (pid > 0) {
         exit(EXIT_SUCCESS);
     }
 
 untuk memastikan file dapat dieksekusi
+
     umask(0);
 
 Program Utama
+
     sid = setsid();
     if (sid < 0) {
         exit(EXIT_FAILURE);
