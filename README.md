@@ -154,8 +154,6 @@ Program Utama
 
 <h3>Nomor 2</h3>
 
-*Note : Fungsi killer belum sesuai pada mode -b.
-
 Include library
 
     #include <sys/stat.h>
