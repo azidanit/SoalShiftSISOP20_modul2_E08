@@ -152,6 +152,128 @@ Program Utama
             
     } 
 
+<h3>Nomor 2</h3>
+
+*Note : Fungsi killer belum sesuai pada mode -b.
+
+Include library
+
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #include <sys/wait.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <fcntl.h>
+    #include <errno.h>
+    #include <unistd.h>
+    #include <syslog.h>
+    #include <string.h>
+    #include <time.h>
+
+Program Utama
+
+    pid_t pid, sid;        // Variabel untuk menyimpan PID
+
+    pid = fork();     // Menyimpan PID dari Child Process
+
+    /* Keluar saat fork gagal
+    * (nilai variabel pid < 0) */
+    if (pid < 0) {
+      exit(EXIT_FAILURE);
+    }
+
+    /* Keluar saat fork berhasil
+    * (nilai variabel pid adalah PID dari child process) */
+    if (pid > 0) {
+      exit(EXIT_SUCCESS);
+    }
+
+    umask(0);
+
+    sid = setsid();
+    if (sid < 0) {
+      exit(EXIT_FAILURE);
+    }
+
+    if ((chdir("/")) < 0) {
+      exit(EXIT_FAILURE);
+    }
+
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+
+    FILE *killer;
+    int status;
+    killer = fopen("/home/daffa/Desktop/Modul2/killer.sh", "w");
+
+    if (strcmp(argv[1], "-a") == 0)
+      fprintf(killer, "#!/bin/bash\nkill -9 -%d\n rm killer", getpid());
+    else if (strcmp(argv[1], "-b") == 0)
+      fprintf(killer, "#!/bin/bash\nkill %d\n rm killer", getpid());
+    
+    if (fork() == 0)
+    {
+      char *argv[] = {"chmod", "+x", "/home/daffa/Desktop/Modul2/killer.sh", NULL};
+      execv("/bin/chmod", argv);
+    }
+    else
+    {
+      if(fork() == 0)
+      {
+        while ((wait(&status)) > 0);    
+
+      char *argv[] = {"mv", "/home/daffa/Desktop/Modul2/killer.sh", "/home/daffa/Desktop/Modul2/killer", NULL};
+      execv("/bin/mv", argv);
+      }
+    }
+    fclose(killer);
+
+     while (1) {
+    
+    time_t tme = time(NULL);
+    struct tm tm = *localtime(&tme);
+
+    char dirName[100],dirpName[100];
+    
+    char dir[100] = "/home/daffa/Desktop/Modul2/soal3/";
+    sprintf(dirName, "%04d-%02d-%02d_%02d:%02d:%02d",tm.tm_year + 1900, tm.tm_mon+1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    strcpy(dirpName,dir);
+    strcat(dirpName, dirName);
+    pid_t child_id,child_id2,child_id3;
+    child_id = fork();
+    int status;
+
+membuat directory dari argumen dirpname
+
+    char *argv[] = {"mkdir", "-p", dirpName, NULL};
+    execv("/bin/mkdir", argv);
+
+
+Mendownload gambar dengan ukuran square Epoch Unix dan memasukkannya dalam folder sesuai timestamp
+
+    int t = (int)time(NULL);
+    t = (t % 1000)+100;
+
+    time_t nt = time(NULL);
+    struct tm now = *localtime(&nt);
+
+    char download[100];
+    sprintf(download, "https://picsum.photos/%d", t);
+
+    char fileName[100];
+    sprintf(fileName, "/home/daffa/Desktop/Modul2/soal3/%s/%04d-%02d-%02d_%02d:%02d:%02d", dirName, now.tm_year + 1900, now.tm_mon+1, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec);
+
+    char *argv[] = {"wget", download, "-qO", fileName, NULL};
+    execv("/usr/bin/wget", argv);
+
+Untuk membuat zip file dari directory yang telah ada
+
+    char zipped[100];
+    sprintf(zipped, "/home/daffa/Desktop/Modul2/soal3/%s.zip", dirName);
+    char *argv[] = {"zip", "-qrrm", zipped, dirpName, NULL};
+    execv("/usr/bin/zip", argv);
+
 
 <h3>Nomor 3</h3>
 
@@ -197,81 +319,135 @@ mengecek direcotry pada suatu path
 
 program utama
 
-*Note* : masih belum sempuran, hanya sampai poin c
-
-    int status;
-    int file_count = 0;
+    int file_count = 0,i;
     DIR * dirp;
     struct dirent * entry;
-    char fileName[100],dirName[100];
+    char fileName[100],dirName[100],filedir[100],filedir2[100];
     char *fileArgv[100];
     char *fileArgv2[100];
+    char *fileArgv3[100];
     int counterF = 0, counterD=0;
     for (counterF = 0; counterF <100; counterF++,counterD++){
       fileArgv[counterF] = (char*) malloc (100 * sizeof(char));
       fileArgv2[counterD]= (char*) malloc (100 * sizeof(char));
+      fileArgv3[counterD]= (char*) malloc (100 * sizeof(char));
     }
     strcpy(fileArgv[0],"mv");
     strcpy(fileArgv2[0], "mv");
+    // strcpy(fileArgv2[1],);
     counterF = 1;
-    counterD = 1;
+        counterD = 1;
     strcpy(fileName,"");
     strcpy(dirName,"");
     dirp = opendir("/home/daffa/Downloads/jpg/"); /* There should be error handling after this */
     while ((entry = readdir(dirp)) != NULL) {
+  
         if (entry->d_type == DT_REG) { /* If the entry is a regular file */
           strcpy(fileName,"/home/daffa/modul2/jpg/");
           strcat(fileName, entry->d_name);
-          // strcat(fileName, " ");
           
           strcpy(fileArgv[counterF],fileName);
           counterF++;
-        } else{
-          strcpy(fileName,"/home/daffa/modul2/jpg/");
-          strcat(dirName, entry->d_name);
+        } else if(entry->d_type == 4){
+           
+         if (!strcmp (entry->d_name, ".")) continue;
+          if (!strcmp (entry->d_name, ".."))continue;
           
-          strcpy(fileArgv2[counterF],dirName);
+          strcpy(fileArgv3[counterD-1],entry->d_name);
+          strcpy(dirName,"/home/daffa/modul2/jpg/");
+          strcat(dirName, entry->d_name);
+          strcpy(fileArgv2[counterD],dirName);
           counterD++;
+          
+          
         }
+       
     }
+  
     strcpy(fileArgv[counterF],"/home/daffa/modul2/sedaap/");
     strcpy(fileArgv2[counterD],"/home/daffa/modul2/indomie/");
+    
     fileArgv[counterF+1] = NULL;
     fileArgv2[counterD+1] = NULL;
+  
 
     closedir(dirp);
 
-    pid_t child_id1,child_id2,child_id3, child_id4, child_id5;
+    pid_t child_id1,child_id2,child_id3, child_id4,child_id5;
+    int status;
     child_id1 = fork();
-    child_id2 = fork();
-    child_id3 = fork();
-    child_id4 = fork();
-    child_id5 = fork();
+    
     if (child_id1 == 0) 
     {   
       char *argv[] = {"mkdir", "-p", "/home/daffa/modul2/indomie", NULL};
       execv("/bin/mkdir", argv);
     }
-      if (child_id2 == 0)      
+    else 
     {
-      
-      while ((wait(&status)) > 0);
+       // while(wait(&status) >0 );
+        child_id2 = fork();
+    }
+    if (child_id2 == 0)      
+    {
       sleep(5);
-
       char *argv[] = {"mkdir", "-p", "/home/daffa/modul2/sedaap", NULL};
       execv("/bin/mkdir", argv);
     }
+    else
+    {
+        //while(wait(&status) >0 );
+        child_id3 = fork();
+    }
     if(child_id3 == 0)
     {
-      while ((wait(&status)) > 0);
-    char *argv[] = {"unzip", "/home/daffa/Downloads/jpg.zip", "-d", "/home/daffa/modul2/",NULL};
-      execv("usr/bin/unzip", argv);
+      char *argv[] = {"unzip", "/home/daffa/Downloads/jpg.zip", "-d", "/home/daffa/modul2/",NULL};
+      execv("/usr/bin/unzip", argv);
     }
-    if(child_id4 == 0 && child_id3 > 0 && child_id2 > 0 && child_id1 > 0){
-      execv("/bin/mv",fileArgv);
-    }
-    if (child_id5 == 0 && child_id4 > 0 && child_id3 > 0 && child_id2 > 0 && child_id1 > 0)
+    else 
     {
-      execv("/bin/mv",fileArgv2);
+      while(wait(&status) >0 );
+        child_id4 = fork();
     }
+     
+     if(child_id4 == 0){
+       execv("/bin/mv",fileArgv);
+     }
+    else
+    {
+       //while(wait(&status) >0 );
+        child_id5 = fork();
+    }
+    if (child_id5 == 0)
+    {
+       execv("/bin/mv",fileArgv2);
+    }
+    while(wait(&status) >0 );
+    if(child_id5 > 0)
+    {
+     
+      for (i = 0; i < counterD-1 ; i++)
+      {
+        sprintf(filedir,"/home/daffa/modul2/indomie/%s/coba1.txt",fileArgv3[i]);
+        sprintf(filedir2,"/home/daffa/modul2/indomie/%s/coba2.txt",fileArgv3[i]);
+        //printf("%s\n",filedir);
+
+        
+         if(fork() == 0)
+        {
+          char *argv[] = {"touch", filedir,NULL};
+        execv("/usr/bin/touch",argv);
+        }
+        sleep(3);
+         if(fork() == 0)
+        {
+        char *argv[] = {"touch", filedir2,NULL};
+        execv("/usr/bin/touch",argv);
+        }
+
+      }
+      
+
+      
+    }
+  
     
